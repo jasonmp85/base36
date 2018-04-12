@@ -6,6 +6,7 @@
 
 PG_MODULE_MAGIC;
 
+PGDLLEXPORT Datum base36_encode(PG_FUNCTION_ARGS);
 PG_FUNCTION_INFO_V1(base36_encode);
 Datum base36_encode(PG_FUNCTION_ARGS) {
   int32 arg = PG_GETARG_INT32(0);

@@ -192,7 +192,14 @@ install (
 get_filename_component (PGC_BASEDIR "${PGC_PGXS}" DIRECTORY)
 get_filename_component (PGC_BASEDIR "${PGC_BASEDIR}" DIRECTORY)
 get_filename_component (PGC_BASEDIR "${PGC_BASEDIR}" DIRECTORY)
-set (PG_REGRESS "${PGC_BASEDIR}/src/test/regress/pg_regress")
+
+if (WIN32)
+	find_program (PG_REGRESS pg_regress
+		HINTS "${PGC_BASEDIR}/src/test/regress/" "${PGC_BINDIR}"
+		NO_DEFAULT_PATH)
+else ()
+	set (PG_REGRESS "${PGC_BASEDIR}/src/test/regress/pg_regress")
+endif (WIN32)
 
 set (REGRESS_OPTS
 	   --dbname=contrib_regression
