@@ -34,6 +34,12 @@ set (PG_CONFIG "pg_config" CACHE STRING
 
 # Get PostgreSQL configuration from pg_config
 execute_process (
+  COMMAND ${PG_CONFIG} --includedir
+  OUTPUT_VARIABLE PGC_INCLUDEDIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+execute_process (
   COMMAND ${PG_CONFIG} --includedir-server
   OUTPUT_VARIABLE PGC_INCLUDEDIR_SERVER
   OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -70,6 +76,12 @@ execute_process (
 )
 
 execute_process (
+  COMMAND ${PG_CONFIG} --libdir
+  OUTPUT_VARIABLE PGC_LIBDIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+execute_process (
   COMMAND ${PG_CONFIG} --pkglibdir
   OUTPUT_VARIABLE PGC_PKGLIBDIR
   OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -87,50 +99,74 @@ execute_process (
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-set (PGC_DATADIR PGC_SHAREDIR)
-set (DATAMODULEDIR "extension") # TODO should be configurable and be 'contrib' sometimes
-
-# Get variables into list form
-separate_arguments (PGC_CFLAGS)
-separate_arguments (PGC_CPPFLAGS)
-separate_arguments (PGC_LDFLAGS)
-
-# Remove bad input from pg_config
-list (REMOVE_ITEM PGC_CPPFLAGS "-DFRONTEND")
-list (FILTER PGC_LDFLAGS EXCLUDE REGEX -L\\.\\.)
-
-# Build LDFLAGS back into string
-foreach (FLAG ${PGC_LDFLAGS})
-	string (APPEND PROJ_LDFLAGS " ${FLAG}")
-endforeach (FLAG ${PGC_LDFLAGS})
-
 # Add our main library...
 add_library ("${PROJECT_NAME}" MODULE "src/base36.c")
 
+set (PGC_DATADIR PGC_SHAREDIR)
+set (DATAMODULEDIR "extension") # TODO should be configurable and be 'contrib' sometimes
+
+# set up compiler and linker flags on *nix-y OSes
+if (UNIX)
 # ... its include directories.
-target_include_directories ("${PROJECT_NAME}"
-	PUBLIC "${PROJECT_BINARY_DIR}"
-	PUBLIC "${PGC_INCLUDEDIR_SERVER}"
-	PUBLIC "${PGC_PKGINCLUDEDIR}/internal"
-)
+	target_include_directories ("${PROJECT_NAME}"
+		PUBLIC "${PROJECT_BINARY_DIR}"
+		PUBLIC "${PGC_INCLUDEDIR_SERVER}"
+		PUBLIC "${PGC_PKGINCLUDEDIR}/internal"
+	)
 
-# Remove built-in MODULE compilation flags...
-unset (CMAKE_SHARED_MODULE_CREATE_C_FLAGS)
+	# get variables into list form
+	separate_arguments (PGC_CFLAGS)
+	separate_arguments (PGC_CPPFLAGS)
+	separate_arguments (PGC_LDFLAGS)
 
-# ... and add those from pg_config.
-target_compile_options (${PROJECT_NAME} PUBLIC ${PGC_CFLAGS}
-                                        PUBLIC ${PGC_CPPFLAGS})
+	# Remove bad input from pg_config
+	list (REMOVE_ITEM PGC_CPPFLAGS "-DFRONTEND")
+	list (FILTER PGC_LDFLAGS EXCLUDE REGEX -L\\.\\.)
 
-# Override module linker flags to specify bundle loader
-set (CMAKE_MODULE_LINKER_FLAGS "-bundle -bundle_loader ${PGC_BINDIR}/postgres")
+	# Build LDFLAGS back into string
+	foreach (FLAG ${PGC_LDFLAGS})
+		string (APPEND PROJ_LDFLAGS " ${FLAG}")
+	endforeach (FLAG ${PGC_LDFLAGS})
 
-# Get rid of symbol, prefix, and PIC settings; set link flags.
-set_target_properties ("${PROJECT_NAME}" PROPERTIES
-	PREFIX ""
-	DEFINE_SYMBOL ""
-	POSITION_INDEPENDENT_CODE FALSE
-	LINK_FLAGS "${PROJ_LDFLAGS}"
-)
+	# ... and add those from pg_config.
+	target_compile_options (${PROJECT_NAME} PUBLIC ${PGC_CFLAGS}
+											PUBLIC ${PGC_CPPFLAGS})
+endif (UNIX)
+
+if (APPLE)
+	# Remove built-in MODULE compilation flags...
+	unset (CMAKE_SHARED_MODULE_CREATE_C_FLAGS)
+
+	# Override module linker flags to specify bundle loader
+	set (CMAKE_MODULE_LINKER_FLAGS "-bundle -bundle_loader ${PGC_BINDIR}/postgres")
+
+	# Get rid of symbol, prefix, and PIC settings; set link flags.
+	set_target_properties ("${PROJECT_NAME}" PROPERTIES
+		PREFIX ""
+		DEFINE_SYMBOL ""
+		POSITION_INDEPENDENT_CODE FALSE
+		LINK_FLAGS "${PROJ_LDFLAGS}"
+	)
+endif (APPLE)
+
+if (WIN32)
+# ... its include directories.
+	target_include_directories ("${PROJECT_NAME}"
+		PUBLIC "${PROJECT_BINARY_DIR}"
+		PUBLIC "${PGC_INCLUDEDIR}"
+		PUBLIC "${PGC_INCLUDEDIR_SERVER}"
+		PUBLIC "${PGC_PKGINCLUDEDIR}/internal"
+		PUBLIC "${PGC_INCLUDEDIR_SERVER}/port/win32"
+	)
+
+	target_compile_options("${PROJECT_NAME}" PUBLIC "-D_CRT_SECURE_NO_WARNINGS")
+
+	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /MANIFEST:NO ${PGC_LIBDIR}/postgres.lib ws2_32.lib")
+
+	if (MSVC)
+		include_directories("${PGC_INCLUDEDIR_SERVER}/port/win32_msvc")
+	endif (MSVC)
+endif (WIN32)
 
 install (
   TARGETS ${PROJECT_NAME}
