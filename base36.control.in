@@ -1,0 +1,5 @@
+# @PROJECT_NAME@ extension
+comment = '@PROJECT_DESCRIPTION@'
+default_version = '@PROJECT_VERSION@'
+module_pathname = '$libdir/@PROJECT_NAME@'
+relocatable = true

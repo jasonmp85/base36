@@ -1,0 +1,23 @@
+BINDIR = /usr/local/Cellar/postgresql@10/10.3/bin
+DOCDIR = /usr/local/Cellar/postgresql@10/10.3/share/doc
+HTMLDIR = /usr/local/Cellar/postgresql@10/10.3/share/doc
+INCLUDEDIR = /usr/local/Cellar/postgresql@10/10.3/include
+PKGINCLUDEDIR = /usr/local/Cellar/postgresql@10/10.3/include
+INCLUDEDIR-SERVER = /usr/local/Cellar/postgresql@10/10.3/include/server
+LIBDIR = /usr/local/Cellar/postgresql@10/10.3/lib
+PKGLIBDIR = /usr/local/Cellar/postgresql@10/10.3/lib
+LOCALEDIR = /usr/local/Cellar/postgresql@10/10.3/share/locale
+MANDIR = /usr/local/Cellar/postgresql@10/10.3/share/man
+SHAREDIR = /usr/local/Cellar/postgresql@10/10.3/share
+SYSCONFDIR = /usr/local/Cellar/postgresql@10/10.3/etc
+PGXS = /usr/local/Cellar/postgresql@10/10.3/lib/pgxs/src/makefiles/pgxs.mk
+CONFIGURE = '--prefix=/usr/local/Cellar/postgresql@10/10.3' '--enable-dtrace' '--enable-nls' '--with-bonjour' '--with-gssapi' '--with-icu' '--with-ldap' '--with-libxml' '--with-libxslt' '--with-openssl' '--with-uuid=e2fs' '--with-pam' '--with-perl' '--with-python' '--with-tcl' 'XML2_CONFIG=:' '--with-includes=/usr/local/opt/gettext/include:/usr/local/opt/icu4c/include:/usr/local/opt/openldap/include:/usr/local/opt/openssl/include:/usr/local/opt/readline/include:/usr/local/opt/tcl-tk/include' '--with-libraries=/usr/local/opt/gettext/lib:/usr/local/opt/icu4c/lib:/usr/local/opt/openldap/lib:/usr/local/opt/openssl/lib:/usr/local/opt/readline/lib:/usr/local/opt/tcl-tk/lib' '--with-extra-version= (Homebrew petere/postgresql)' 'CC=clang' 'PKG_CONFIG_PATH=/usr/local/opt/e2fsprogs/lib/pkgconfig:/usr/local/opt/openssl/lib/pkgconfig:/usr/local/opt/icu4c/lib/pkgconfig:/usr/local/opt/tcl-tk/lib/pkgconfig' 'PKG_CONFIG_LIBDIR=/usr/lib/pkgconfig:/usr/local/Homebrew/Library/Homebrew/os/mac/pkgconfig/10.13'
+CC = clang
+CPPFLAGS = -DFRONTEND -I/usr/local/Cellar/icu4c/61.1/include -I/usr/local/opt/gettext/include -I/usr/local/opt/icu4c/include -I/usr/local/opt/openldap/include -I/usr/local/opt/openssl/include -I/usr/local/opt/readline/include -I/usr/local/opt/tcl-tk/include
+CFLAGS = -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Wendif-labels -Wmissing-format-attribute -Wformat-security -fno-strict-aliasing -fwrapv -Wno-unused-command-line-argument -O2
+CFLAGS_SL = 
+LDFLAGS = -L../../src/common -L/usr/local/opt/gettext/lib -L/usr/local/opt/icu4c/lib -L/usr/local/opt/openldap/lib -L/usr/local/opt/openssl/lib -L/usr/local/opt/readline/lib -L/usr/local/opt/tcl-tk/lib -Wl,-dead_strip_dylibs
+LDFLAGS_EX = 
+LDFLAGS_SL = 
+LIBS = -lpgcommon -lpgport -lintl -lxslt -lxml2 -lpam -lssl -lcrypto -lgssapi_krb5 -lz -lreadline -lm  
+VERSION = PostgreSQL 10.3 (Homebrew petere/postgresql)
